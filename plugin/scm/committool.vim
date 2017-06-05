@@ -33,13 +33,17 @@ function s:common_buffer_observer_calls.load() dict
   call scm#misc#SetCurrentBufferContent(content)
 endfunction
 
+function s:common_buffer_observer_calls.hasSaveContent(content)
+  return scm#misc#HasNonWhitespaceContent(a:content)
+endfunction
+
 function s:common_buffer_observer_calls.save() dict
   if !has_key(self, "persist_file")
     return 0
   endif
 
   let content = self.getContent()
-  if scm#misc#HasNonWhitespaceContent(content)
+  if self.hasSaveContent(content)
     return writefile(content, self.persist_file) == 0
   else
     return filereadable(self.persist_file) ? delete(self.persist_file) == 0 : 1
@@ -104,6 +108,11 @@ function s:changed_files_buffer_observer_calls.toggleCurrentTag() dict
   return new_tag != "-"
 endfunction
 
+function! s:changed_files_buffer_observer_calls.hasSaveContent(content)
+  let tagged_files = self.getTaggedFiles()
+  return !empty(tagged_files)
+endfunction
+
 function s:changed_files_buffer_observer_calls.updateComments(file, is_tagged) dict
   if self.hasNamedLinkedBufferObserver(self.comments_buffer_observer_name)
     let comments_buffer_observer = self.getNamedLinkedBufferObservers(self.comments_buffer_observer_name)
@@ -137,6 +146,7 @@ endfunction
 function s:changed_files_buffer_observer_calls.refresh() dict
   echo "committool: finding changed files..."
   let changed_files = self.scm_accessor.getChangedFiles()
+  call sort(changed_files)
   call filter(changed_files, 'v:val !~# ".vim.committool_*"')
   redraw!
 
@@ -172,7 +182,7 @@ function s:changed_files_buffer_observer_calls.commit() dict
     echo "committool: failed to save comments"
     return
   endif
- 
+
   let committed = self.scm_accessor.commit(tagged_files, comments_buffer_observer.persist_file)
   if committed
     call comments_buffer_observer.switchToWindow()
