@@ -89,7 +89,7 @@ endfunction
 function s:changed_files_buffer_observer_calls.getTaggedFiles() dict
   let tagged_files = []
   for line_number in range(1, line("$"))
-    if self.getTag(line_number) != "-"
+    if self.getTag(line_number) == "+"
       let tagged_files += [self.getFile(line_number)]
     endif
   endfor
@@ -187,6 +187,7 @@ function s:changed_files_buffer_observer_calls.commit() dict
   if committed
     call comments_buffer_observer.switchToWindow()
     call scm#misc#SetCurrentBufferContent([])
+    call self.switchToWindow()
   endif
 
   call self.refresh()
