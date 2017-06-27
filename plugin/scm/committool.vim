@@ -33,8 +33,8 @@ function s:common_buffer_observer_calls.load() dict
   call scm#misc#SetCurrentBufferContent(content)
 endfunction
 
-function s:common_buffer_observer_calls.hasSaveContent(content)
-  return scm#misc#HasNonWhitespaceContent(a:content)
+function s:common_buffer_observer_calls.hasSaveContent()
+  return scm#misc#HasNonWhitespaceContent(self.getContent())
 endfunction
 
 function s:common_buffer_observer_calls.save() dict
@@ -42,9 +42,8 @@ function s:common_buffer_observer_calls.save() dict
     return 0
   endif
 
-  let content = self.getContent()
-  if self.hasSaveContent(content)
-    return writefile(content, self.persist_file) == 0
+  if self.hasSaveContent()
+    return writefile(self.getContent(), self.persist_file) == 0
   else
     return filereadable(self.persist_file) ? delete(self.persist_file) == 0 : 1
   endif
@@ -70,12 +69,20 @@ let s:changed_files_buffer_observer_calls = {}
 
 let s:tag_and_file_pattern = '^\([-+]\)  \(.*\)$'
 
+function s:getTag(line)
+  return substitute(a:line, s:tag_and_file_pattern, '\1', "")
+endfunction
+
+function s:getFile(line)
+  return substitute(a:line, s:tag_and_file_pattern, '\2', "")
+endfunction
+
 function s:changed_files_buffer_observer_calls.getTag(line_number) dict
-  return substitute(getline(a:line_number), s:tag_and_file_pattern, '\1', "")
+  return s:getTag(getline(a:line_number))
 endfunction
 
 function s:changed_files_buffer_observer_calls.getFile(line_number) dict
-  return substitute(getline(a:line_number), s:tag_and_file_pattern, '\2', "")
+  return s:getFile(getline(a:line_number))
 endfunction
 
 function s:changed_files_buffer_observer_calls.getCurrentTag() dict
@@ -88,9 +95,10 @@ endfunction
 
 function s:changed_files_buffer_observer_calls.getTaggedFiles() dict
   let tagged_files = []
-  for line_number in range(1, line("$"))
-    if self.getTag(line_number) == "+"
-      let tagged_files += [self.getFile(line_number)]
+  let content = self.getContent()
+  for line in content
+    if s:getTag(line) == "+"
+      let tagged_files += [s:getFile(line)]
     endif
   endfor
   return tagged_files
@@ -108,7 +116,7 @@ function s:changed_files_buffer_observer_calls.toggleCurrentTag() dict
   return new_tag != "-"
 endfunction
 
-function! s:changed_files_buffer_observer_calls.hasSaveContent(content)
+function! s:changed_files_buffer_observer_calls.hasSaveContent()
   let tagged_files = self.getTaggedFiles()
   return !empty(tagged_files)
 endfunction
