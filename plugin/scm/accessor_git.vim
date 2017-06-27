@@ -53,7 +53,7 @@ function! s:accessor_git.commit(files, comment_file) dict
 endfunction
 
 let s:revision_id_pattern = '\(\^\?[0-9a-f]\+\)'
-let s:blame_pattern = s:revision_id_pattern . ' (\([A-z ]\+\)\([0-9-:+ ]\+\)) \(.*\)'
+let s:blame_pattern = s:revision_id_pattern . '.* (\([A-z ]\+\)\([0-9-:+ ]\+\)) \(.*\)'
 let s:blame_sub = '\=strpart(submatch(1), 0, 8) . "  " . submatch(2)'
 let s:blame_sub_with_content = s:blame_sub . ' . "| " . submatch(4)'
 
