@@ -92,7 +92,11 @@ function! s:accessor_git.getCommitComment(file, revision_id) dict
 endfunction
 
 function! s:accessor_git.getCommitFiles(file, revision_id)
-  return split(self.git("log -n 1 --name-only --pretty=format: " . a:revision_id), '\n')
+  let commit_files = split(self.git("log -n 1 --name-only --pretty=format: " . a:revision_id), '\n')
+  if count(commit_files, a:file) == 0
+    let commit_files += [a:file]
+  endif
+  return commit_files
 endfunction
 
 

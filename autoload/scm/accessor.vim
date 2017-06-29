@@ -19,7 +19,7 @@ endfunction
 function s:accessor.system(cmd)
   let cmd_output = system(a:cmd)
   if v:shell_error != 0
-    echom a:cmd . ": " . v:shell_error
+    echom a:cmd . ": " . v:shell_error . ": " . cmd_output
   endif
   return v:shell_error == 0 ? cmd_output : ""
 endfunction
