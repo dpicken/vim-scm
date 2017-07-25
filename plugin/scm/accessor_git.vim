@@ -36,6 +36,7 @@ function! s:accessor_git.getDiffs(file) dict
 endfunction
 
 function! s:accessor_git.discard(file) dict
+  call self.git("reset HEAD " . a:file)
   call delete(self.getRoot() . '/' . a:file)
   call self.git("checkout " . a:file)
 endfunction
@@ -55,7 +56,7 @@ endfunction
 let s:revision_id_pattern = '\(\^\?[0-9a-f]\+\)'
 let s:blame_pattern = s:revision_id_pattern . '.* (\([A-z ]\+\)\([0-9-:+ ]\+\)) \(.*\)'
 let s:blame_sub = '\=strpart(submatch(1), 0, 8) . "  " . submatch(2)'
-let s:blame_sub_with_content = s:blame_sub . ' . "| " . submatch(4)'
+let s:blame_sub_with_content = '\=strpart(submatch(1), 0, 8) . "  " . printf("%.10s", submatch(2)) . repeat(" ", 10 - len(submatch(2))) . "| " . submatch(4)'
 
 function! s:accessor_git.getBlame(file) dict
   let blame = split(self.git("blame --abbrev=8 -- " . a:file), '\n')

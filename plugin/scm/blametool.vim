@@ -64,7 +64,7 @@ function s:CreateBlameWindow(source_file, scm_accessor)
   execute "silent aboveleft vertical split " . blame_file
 
   setlocal number
-  30 wincmd |
+  24 wincmd |
 
   let blame = a:scm_accessor.getBlame(a:source_file)
   call scm#misc#SetCurrentBufferContent(blame)
