@@ -193,8 +193,8 @@ function s:commit_buffer_observer_calls.onCursorMoved() dict
   let self.current_line_number = current_line_number
 
   let source_file = self.currentLineToFile()
-  let current_revision_id = self.scm_accessor.getRevisionIdFromCommitId(source_file, self.commit_id)
-  let previous_revision_id = self.scm_accessor.getParentRevisionId(source_file, current_revision_id)
+  let current_revision_id = source_file != "" ? self.scm_accessor.getRevisionIdFromCommitId(source_file, self.commit_id) : ""
+  let previous_revision_id = source_file != "" ? self.scm_accessor.getParentRevisionId(source_file, current_revision_id) : ""
 
   call s:RefreshRevisionBuffer(self, self.current_revision_buffer_observer_name, source_file, current_revision_id)
   call s:RefreshRevisionBuffer(self, self.previous_revision_buffer_observer_name, source_file, previous_revision_id)

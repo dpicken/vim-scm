@@ -13,13 +13,13 @@ function s:accessor.getSCMName()
 endfunction
 
 function s:accessor.error(message)
-  echo "scm#accessor: " . self.getSCMName() . ": " . a:message
+  echom "scm#accessor: " . self.getSCMName() . ": " . a:message
 endfunction
 
 function s:accessor.system(cmd)
   let cmd_output = system(a:cmd)
   if v:shell_error != 0
-    echom a:cmd . ": " . v:shell_error . ": " . cmd_output
+    call self.error(a:cmd . ": " . v:shell_error . ": " . cmd_output)
   endif
   return v:shell_error == 0 ? cmd_output : ""
 endfunction
