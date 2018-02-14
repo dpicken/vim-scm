@@ -233,8 +233,6 @@ function s:changed_files_buffer_observer_calls.actionDiscard() dict range
     let discard_files += [file]
   endfor
 
-  let current_file = self.getCurrentFile()
-
   echo join(discard_files, "\n")
   if confirm("committool: are you sure you want to discard these changes?", "&y\n&n", 2) != 1
     return
@@ -247,13 +245,20 @@ function s:changed_files_buffer_observer_calls.actionDiscard() dict range
   call self.refresh()
 endfunction
 
-function s:changed_files_buffer_observer_calls.actionEditFile() dict
+function s:changed_files_buffer_observer_calls.actionEdit() dict range
   if scm#misc#IsCurrentBufferEmpty()
     return
   endif
 
-  let file = self.getCurrentFile()
-  call scm#misc#EditFile(self.scm_accessor.getRoot() . "/" . file)
+  let edit_files = []
+  for line_number in range(a:firstline, a:lastline)
+    let file = self.getFile(line_number)
+    let edit_files += [file]
+  endfor
+
+  for file in edit_files
+    call scm#misc#EditFile(self.scm_accessor.getRoot() . "/" . file)
+  endfor
 endfunction
 
 function s:changed_files_buffer_observer_calls.actionToggleTag() dict
@@ -301,7 +306,7 @@ function s:MakeChangedFilesBufferObserver(bufnr, scm_accessor)
 
   call changed_files_buffer_observer.registerCallbacks()
   call changed_files_buffer_observer.mapKeySequenceWithVisualRange("d", "actionDiscard")
-  call changed_files_buffer_observer.mapKeySequence("e", "actionEditFile")
+  call changed_files_buffer_observer.mapKeySequenceWithVisualRange("e", "actionEdit")
   call changed_files_buffer_observer.mapKeySequence("r", "actionRefresh")
   call changed_files_buffer_observer.mapKeySequenceWithVisualRange("T", "actionToggleTag")
   call changed_files_buffer_observer.mapKeySequenceWithVisualRange("t", "actionToggleTagAndMoveFocusIfTagged")
